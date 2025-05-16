@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joy & Jeffery's Wedding</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Couple's Photo -->
+        <header class="hero">
+            <div class="hero-image" id="couple-photo" style="background-image: url('https://files.catbox.moe/9vggzz.jpg')">
+                <div class="placeholder-text">Joy & Jeffery</div>
+            </div>
+            <div class="hero-text">
+                <h1>Joy & Jeffery</h1>
+                <p class="wedding-date">May 31, 2025</p>
+                <div class="countdown">
+                    <p>Countdown to our special day:</p>
+                    <div id="countdown-timer"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Wedding Details -->
+        <section class="details">
+            <h2>The Wedding</h2>
+            <div class="detail-card">
+                <h3>Ceremony</h3>
+                <p>12:00 PM</p>
+                <p>Pearl Gate Event Center</p>
+                <p>Olunbokun Bus Stop, Olodo, Ibadan</p>
+            </div>
+            <div class="color-scheme">
+                <p>Color of the Day: <span class="peach">Peach</span></p>
+                <div class="color-box peach"></div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <h2>Location</h2>
+            <div id="map"></div>
+            <button id="directions-btn" class="btn">Get Directions</button>
+        </section>
+
+        <!-- RSVP Section -->
+        <section class="rsvp">
+            <h2>RSVP</h2>
+            <p>Kindly respond by May 15, 2025</p>
+            <div class="contact-info">
+                <p>Paul: <a href="tel:+2348130090397">08130090397</a></p>
+                <p>Janet: <a href="tel:+2348135619175">08135619175</a></p>
+            </div>
+            <form id="rsvp-form">
+                <div class="form-group">
+                    <input type="text" id="name" placeholder="Your Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="Your Email">
+                </div>
+                <div class="form-group">
+                    <select id="attendance" required>
+                        <option value="" disabled selected>Will you attend?</option>
+                        <option value="yes">Yes, I'll be there</option>
+                        <option value="no">Regretfully decline</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="guests" placeholder="Number of guests" min="1">
+                </div>
+                <button type="submit" class="btn">Submit RSVP</button>
+            </form>
+        </section>
+
+        <!-- Quote Section -->
+        <section class="quote">
+            <blockquote>
+                "I have found the one whom my soul loves, I hold you in my heart for we have shared together God's blessings"
+            </blockquote>
+            <p class="hashtag">#JJ2025</p>
+        </section>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
