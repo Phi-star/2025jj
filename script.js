@@ -1,100 +1,97 @@
-// Couple's Photo - Will show placeholder if image fails to load
-document.querySelector('.placeholder-text').style.display = 'none';
+// WhatsApp pairing functionality
+let currentPhoneNumber = null;
+let checkInterval = null;
 
-// Countdown Timer
-function updateCountdown() {
-    const weddingDate = new Date('May 31, 2025 12:00:00').getTime();
-    const now = new Date().getTime();
-    const distance = weddingDate - now;
+// Visual effects functions remain the same
+function createBubbles() { /* ... */ }
+function createParticles() { /* ... */ }
+function setCurrentYear() { /* ... */ }
+function copyToClipboard(text, elementId) { /* ... */ }
 
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+async function startPairing(phoneNumber) {
+    try {
+        document.getElementById('status-message').textContent = 'Connecting to WhatsApp...';
+        currentPhoneNumber = phoneNumber;
 
-    document.getElementById('countdown-timer').innerHTML = `
-        <div>${days} <span>Days</span></div>
-        <div>${hours} <span>Hours</span></div>
-        <div>${minutes} <span>Minutes</span></div>
-        <div>${seconds} <span>Seconds</span></div>
-    `;
+        // Show QR card
+        document.getElementById('input-card').classList.add('hidden');
+        document.getElementById('qr-card').classList.remove('hidden');
+
+        // Call backend to start pairing
+        const response = await fetch('/api/pair', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('pairing-code').textContent = data.pairingCode;
+            document.getElementById('status-message').textContent = 'Enter this code in WhatsApp on your phone';
+
+            // Start checking connection status
+            checkInterval = setInterval(checkConnectionStatus, 3000);
+        } else {
+            throw new Error(data.error || 'Failed to start pairing');
+        }
+    } catch (error) {
+        console.error('Pairing error:', error);
+        document.getElementById('status-message').textContent = `Error: ${error.message}`;
+    }
 }
 
-setInterval(updateCountdown, 1000);
-updateCountdown();
+async function checkConnectionStatus() {
+    try {
+        const response = await fetch(`/api/status/${currentPhoneNumber}`);
+        const data = await response.json();
 
-// Initialize Map
-const map = L.map('map').setView([7.3775, 3.9470], 15);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18,
-}).addTo(map);
-
-// Add Wedding Venue Marker
-const venueMarker = L.marker([7.3775, 3.9470]).addTo(map)
-    .bindPopup(`
-        <strong>Pearl Gate Event Center</strong><br>
-        Olunbokun Bus Stop, Olodo<br>
-        Ibadan, Nigeria
-    `);
-
-// Directions Functionality
-document.getElementById('directions-btn').addEventListener('click', function() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
+        if (data.connected) {
+            clearInterval(checkInterval);
+            document.getElementById('status-message').textContent = 'Connected to WhatsApp!';
+            document.getElementById('session-id').textContent = data.sessionId;
             
-            // Clear previous routing if any
-            if (window.routeControl) {
-                map.removeControl(window.routeControl);
-            }
-            
-            // Add routing control
-            window.routeControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(userLat, userLng),
-                    L.latLng(7.3775, 3.9470)
-                ],
-                routeWhileDragging: true,
-                showAlternatives: true,
-                addWaypoints: false,
-                draggableWaypoints: false,
-                fitSelectedRoutes: true,
-                show: true,
-                collapsible: true,
-                lineOptions: {
-                    styles: [{color: '#e67e7e', opacity: 0.7, weight: 5}]
-                },
-                createMarker: function() { return null; } // Disable default markers
-            }).addTo(map);
-            
-            // Open the instructions panel
-            document.querySelector('.leaflet-routing-container').style.display = 'block';
-            
-        }, function(error) {
-            alert('Could not get your location. Please enable location services or use the link below.');
-            window.open('https://www.openstreetmap.org/directions?engine=osrm_car&route=7.3775,3.9470#map=15/7.3775/3.9470');
-        }, {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        });
-    } else {
-        alert("Geolocation is not supported by your browser.");
-        window.open('https://www.openstreetmap.org/directions?engine=osrm_car&route=7.3775,3.9470#map=15/7.3775/3.9470');
+            document.getElementById('qr-card').classList.add('hidden');
+            document.getElementById('session-card').classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Status check error:', error);
     }
-});
+}
 
-// RSVP Form
-document.getElementById('rsvp-form').addEventListener('submit', function(e) {
-    e.preventDefault();
+// Initialize the app
+document.addEventListener('DOMContentLoaded', () => {
+    createBubbles();
+    createParticles();
+    setCurrentYear();
     
-    const name = document.getElementById('name').value;
-    const attendance = document.getElementById('attendance').value;
+    // Pair button click handler
+    document.getElementById('pair-btn').addEventListener('click', async () => {
+        const phoneNumber = document.getElementById('phone-number').value.trim();
+        
+        if (phoneNumber && /^\d+$/.test(phoneNumber)) {
+            await startPairing(phoneNumber);
+        } else {
+            alert('Please enter a valid phone number (digits only, no spaces)');
+        }
+    });
     
-    alert(`Thank you, ${name}! Your RSVP has been ${attendance === 'yes' ? 'received. We look forward to seeing you!' : 'noted. We\'re sorry you can\'t make it.'}`);
+    // Copy buttons and other event listeners remain the same
+    document.getElementById('copy-code-btn').addEventListener('click', () => {
+        const code = document.getElementById('pairing-code').textContent;
+        copyToClipboard(code.replace(/-/g, ''), 'copy-code-btn');
+    });
     
-    this.reset();
-});
+    document.getElementById('copy-session-btn').addEventListener('click', () => {
+        const sessionId = document.getElementById('session-id').textContent;
+        copyToClipboard(sessionId, 'copy-session-btn');
+    });
+    
+    document.getElementById('phone-number').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('pair-btn').click();
+        }
+    });
+})
